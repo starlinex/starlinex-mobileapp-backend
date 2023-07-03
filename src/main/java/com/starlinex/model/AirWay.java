@@ -36,7 +36,7 @@ public class AirWay {
     private String shipperEmailAddress;
     private String shipperKycType;
     private String shipperKycNbr;
-    private byte[] shipperKycDoc;
+    private MultipartFile[] shipperKycDoc;
 
     private String receiverAddressBook;
     private String receiverCompany;

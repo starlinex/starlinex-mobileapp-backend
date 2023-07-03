@@ -1,33 +1,47 @@
 package com.starlinex.service.impl;
 
 import com.starlinex.entity.AirWayBill;
-import com.starlinex.entity.User;
 import com.starlinex.model.AirWay;
 import com.starlinex.repository.AirWayBillRepository;
-import com.starlinex.utils.DocUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.sql.Date;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AirWayBillService {
     private static final Logger LOGGER = Logger.getLogger(AirWayBill.class.getName());
     private final AirWayBillRepository airWayBillRepository;
+    @Value("${doc.path}")
+    private String path;
 
     public String storeAirWayBillInfo(AirWay airWay) throws Exception{
         try{
+            List<String> filePath = new ArrayList<>();
+            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
+                filePath.add(path + File.pathSeparator + doc.getOriginalFilename());
+                try {
+                    Files.copy(doc.getInputStream(), Paths.get(path + File.pathSeparator + doc.getOriginalFilename()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            File file = new File(path);
+            if(!file.exists()){
+                file.mkdir();
+            }
+
             var airWayBill = AirWayBill.builder()
                     .userId(airWay.getUserId())
             .awbNbr(airWay.getAwbNbr())
@@ -52,7 +66,7 @@ public class AirWayBillService {
             .shipperEmailAddress(airWay.getShipperEmailAddress())
             .shipperKycType(airWay.getShipperKycType())
             .shipperKycNbr(airWay.getShipperKycNbr())
-            .shipperKycDoc(airWay.getShipperKycDoc())
+            .shipperKycDoc(filePath)
 
             .receiverAddressBook(airWay.getReceiverAddressBook())
             .receiverCompany(airWay.getReceiverCompany())
@@ -103,6 +117,7 @@ public class AirWayBillService {
             airWayBillRepository.save(airWayBill);
         }catch (Exception e){
             LOGGER.logrb(Level.SEVERE, ResourceBundle.getBundle(e.toString()), String.valueOf(e));
+            throw new Exception(e.getMessage());
         }
         return "Data added successfully";
     }

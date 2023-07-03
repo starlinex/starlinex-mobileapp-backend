@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -41,7 +42,7 @@ public class AirWayBill {
     private String shipperEmailAddress;
     private String shipperKycType;
     private String shipperKycNbr;
-    private byte[] shipperKycDoc;
+    private List<String> shipperKycDoc;
 
     private String receiverAddressBook;
     private String receiverCompany;

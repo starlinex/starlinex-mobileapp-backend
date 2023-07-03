@@ -4,6 +4,7 @@ import com.starlinex.entity.User;
 import com.starlinex.model.*;
 import com.starlinex.repository.UserRepository;
 import com.starlinex.service.impl.AuthenticationService;
+import com.starlinex.service.impl.TempUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,25 +21,77 @@ public class AuthenticationController {
 
     private final AuthenticationService service;
     private final UserRepository repository;
+    private final TempUserService tempUserService;
+
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<ServiceResponse> authenticate(
+            @RequestBody AuthenticationRequest request
+    ) throws Exception {
+        ServiceResponse serviceResponse = new ServiceResponse();
+        try{
+            AuthenticationResponse authenticationResponse = service.authenticate(request);
+            if(authenticationResponse != null){
+                serviceResponse.setResponse(authenticationResponse);
+                serviceResponse.setResponseCode(200);
+                serviceResponse.setMessage("success");
+            }else{
+                serviceResponse.setResponse(null);
+                serviceResponse.setResponseCode(400);
+                serviceResponse.setMessage("Bad credentials");
+            }
+
+        }catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return ResponseEntity.ok(serviceResponse);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<ServiceResponse> register(
             @RequestBody RegisterRequest request
-    ) {
+    ) throws Exception {
         ServiceResponse serviceResponse = new ServiceResponse();
-        serviceResponse.setResponse(service.register(request));
-        serviceResponse.setResponseCode(200);
-        serviceResponse.setMessage("success");
+        try{
+            Otp otp = tempUserService.register(request);
+            if(otp!=null){
+                serviceResponse.setResponse(otp);
+                serviceResponse.setResponseCode(200);
+                serviceResponse.setMessage("success");
+            }
+        else{
+                serviceResponse.setResponse(null);
+                serviceResponse.setResponseCode(404);
+                serviceResponse.setMessage("Bad request");
+            }
+
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
         return ResponseEntity.ok(serviceResponse);
     }
-    @PostMapping("/authenticate")
-    public ResponseEntity<ServiceResponse> authenticate(
-            @RequestBody AuthenticationRequest request
-    ) {
+
+    @PostMapping("/verifyOtp")
+    public ResponseEntity<ServiceResponse> verifyOtp(
+            @RequestBody OtpId otpId
+    ) throws Exception {
         ServiceResponse serviceResponse = new ServiceResponse();
-        serviceResponse.setResponse(service.authenticate(request));
-        serviceResponse.setResponseCode(200);
-        serviceResponse.setMessage("success");
+        try{
+            AuthenticationResponse authenticationResponse = tempUserService.verifyOtpAndSaveUser(otpId);
+            if(authenticationResponse != null){
+                serviceResponse.setResponse(authenticationResponse);
+                serviceResponse.setResponseCode(200);
+                serviceResponse.setMessage("success");
+            }else{
+                serviceResponse.setResponse(null);
+                serviceResponse.setResponseCode(400);
+                serviceResponse.setMessage("otp doesn't match");
+            }
+
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+
         return ResponseEntity.ok(serviceResponse);
     }
 
@@ -59,7 +112,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(otp);
     }
 
-    @PostMapping("/verifyOtp")
+    @PostMapping("/resetPassword")
     public ResponseEntity<ServiceResponse> checkOtpAndUpdatePassword(@RequestBody OtpId otpId){
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setMessage("Success");
