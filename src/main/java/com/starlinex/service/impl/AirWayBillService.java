@@ -29,18 +29,18 @@ public class AirWayBillService {
     public String storeAirWayBillInfo(AirWay airWay) throws Exception{
         try{
             List<String> filePath = new ArrayList<>();
-            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
-                filePath.add(path + File.pathSeparator + doc.getOriginalFilename());
-                try {
-                    Files.copy(doc.getInputStream(), Paths.get(path + File.pathSeparator + doc.getOriginalFilename()));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            File file = new File(path);
-            if(!file.exists()){
-                file.mkdir();
-            }
+//            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
+//                filePath.add(path + File.pathSeparator + doc.getOriginalFilename());
+//                try {
+//                    Files.copy(doc.getInputStream(), Paths.get(path + File.pathSeparator + doc.getOriginalFilename()));
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
+//            File file = new File(path);
+//            if(!file.exists()){
+//                file.mkdir();
+//            }
 
             var airWayBill = AirWayBill.builder()
                     .userId(airWay.getUserId())
