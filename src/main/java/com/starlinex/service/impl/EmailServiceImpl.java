@@ -1,0 +1,37 @@
+package com.starlinex.service.impl;
+
+import com.starlinex.service.EmailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class EmailServiceImpl implements EmailService {
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    private final JavaMailSender javaMailSender;
+
+    @Override
+    public String sendOtp(String toEmail, String userName, String otp) throws Exception {
+            String msg = null;
+        try{
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            String msgBody = "Hi " + userName + "\n\n Your One Time Password(OTP) is " + otp + " the otp will expire in ten minutes if not used \n \n Thank You, \n Star Linex Team";
+            simpleMailMessage.setFrom(fromEmail);
+            simpleMailMessage.setTo(toEmail);
+            simpleMailMessage.setSubject("One Time Password (OTP) to verify Account");
+            simpleMailMessage.setText(msgBody);
+            javaMailSender.send(simpleMailMessage);
+            msg = "Otp sent successfully";
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+        return msg;
+    }
+}

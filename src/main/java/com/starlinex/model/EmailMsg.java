@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Otp {
-    private Integer otp;
+public class EmailMsg {
+    private String msg;
     private Integer id;
 }

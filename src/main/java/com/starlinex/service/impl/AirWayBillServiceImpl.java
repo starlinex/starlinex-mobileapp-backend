@@ -3,6 +3,7 @@ package com.starlinex.service.impl;
 import com.starlinex.entity.AirWayBill;
 import com.starlinex.model.AirWay;
 import com.starlinex.repository.AirWayBillRepository;
+import com.starlinex.service.AirWayBillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,28 +21,32 @@ import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
-public class AirWayBillService {
+public class AirWayBillServiceImpl implements AirWayBillService {
     private static final Logger LOGGER = Logger.getLogger(AirWayBill.class.getName());
     private final AirWayBillRepository airWayBillRepository;
     @Value("${doc.path}")
     private String path;
 
+    @Override
     public String storeAirWayBillInfo(AirWay airWay) throws Exception{
         try{
             List<String> filePath = new ArrayList<>();
-//            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
-//                filePath.add(path + File.pathSeparator + doc.getOriginalFilename());
-//                try {
-//                    Files.copy(doc.getInputStream(), Paths.get(path + File.pathSeparator + doc.getOriginalFilename()));
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
+            File file = new File(path);
+            if(!file.exists()){
+                file.mkdir();
+            }
+            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
+                filePath.add(path + "/" + doc.getOriginalFilename());
+                try {
+                    Files.copy(doc.getInputStream(), Paths.get(path + File.separator + doc.getOriginalFilename()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 //            File file = new File(path);
 //            if(!file.exists()){
 //                file.mkdir();
 //            }
-
             var airWayBill = AirWayBill.builder()
                     .userId(airWay.getUserId())
             .awbNbr(airWay.getAwbNbr())
@@ -116,13 +121,14 @@ public class AirWayBillService {
                     .build();
             airWayBillRepository.save(airWayBill);
         }catch (Exception e){
-            LOGGER.logrb(Level.SEVERE, ResourceBundle.getBundle(e.toString()), String.valueOf(e));
             throw new Exception(e.getMessage());
         }
         return "Data added successfully";
     }
+
+    @Override
     public List<AirWayBill> getDataById(Integer id) throws Exception{
-        List<AirWayBill> airWays = new ArrayList<>();
+        List<AirWayBill> airWays;
         try{
             airWays = airWayBillRepository.findAllByUserId(id);
         }catch (Exception e){

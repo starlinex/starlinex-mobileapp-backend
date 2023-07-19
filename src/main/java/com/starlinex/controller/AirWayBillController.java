@@ -3,40 +3,35 @@ package com.starlinex.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starlinex.model.AirWay;
 import com.starlinex.model.ServiceResponse;
-import com.starlinex.service.impl.AirWayBillService;
-import com.starlinex.utils.DocUtils;
+import com.starlinex.service.impl.AirWayBillServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/airWay")
 @RequiredArgsConstructor
 public class AirWayBillController {
 
-    private final AirWayBillService airWayBillService;
+    private final AirWayBillServiceImpl airWayBillService;
 
     @PostMapping("/storeAirWayBill")
-    public ResponseEntity<ServiceResponse> saveAirWayBill(@RequestPart("airWay") String airWay, @RequestPart("doc")MultipartFile[] file) throws Exception {
+    public ResponseEntity<ServiceResponse> saveAirWayBill(@RequestPart("airWay") String airWay, @RequestPart("doc") MultipartFile[] file) throws Exception {
         ServiceResponse serviceResponse = new ServiceResponse();
         AirWay airWayModel = new AirWay();
         try {
             if (file != null && airWay != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                airWayModel = objectMapper.readValue(airWay,AirWay.class);
+                airWayModel = objectMapper.readValue(airWay, AirWay.class);
                 airWayModel.setShipperKycDoc(file);
                 serviceResponse.setResponseCode(200);
                 serviceResponse.setResponse(airWayBillService.storeAirWayBillInfo(airWayModel));
                 serviceResponse.setMessage("Success");
-            }else{
-                serviceResponse.setResponseCode(404);
-                serviceResponse.setMessage("Failed to store data");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
+            serviceResponse.setResponseCode(404);
+            serviceResponse.setMessage("Failed to store data");
             throw new Exception(e.getMessage());
         }
         return ResponseEntity.ok(serviceResponse);

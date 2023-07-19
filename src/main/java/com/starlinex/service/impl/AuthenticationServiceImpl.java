@@ -2,15 +2,15 @@ package com.starlinex.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starlinex.config.JwtService;
+import com.starlinex.entity.ForgetPassword;
 import com.starlinex.entity.Token;
 import com.starlinex.entity.TokenType;
 import com.starlinex.entity.User;
-import com.starlinex.model.AuthenticationRequest;
-import com.starlinex.model.AuthenticationResponse;
-import com.starlinex.model.OtpId;
-import com.starlinex.model.RegisterRequest;
+import com.starlinex.model.*;
+import com.starlinex.repository.ForgetPasswordRepository;
 import com.starlinex.repository.TokenRepository;
 import com.starlinex.repository.UserRepository;
+import com.starlinex.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +22,21 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailServiceImpl emailService;
+    private final ForgetPasswordRepository forgetPasswordRepository;
 
+
+    @Override
     public AuthenticationResponse register(RegisterRequest request) {
         var user = User.builder()
                 .name(request.getName())
@@ -51,6 +56,8 @@ public class AuthenticationService {
                 .build();
     }
 
+
+    @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -94,6 +101,7 @@ public class AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
+    @Override
     public void refreshToken(
             HttpServletRequest request,
             HttpServletResponse response
@@ -123,17 +131,48 @@ public class AuthenticationService {
     }
 
 
-    public String forgetPassword(OtpId otpId){
-        if(otpId.getOtp().equals(7896)){
-            Optional<User> user = repository.findById(otpId.getId());
-            if(user.isPresent()){
-                User use = user.get();
-                use.setPassword(passwordEncoder.encode(otpId.getPassword()));
-                repository.save(use);
-                return "Password changed successfully";
-            }
 
+    @Override
+    public String resetPassword(OtpId otpId){
+        Optional<ForgetPassword> forgetPassword = forgetPasswordRepository.findByUserId(otpId.getId());
+            if(forgetPassword.isPresent()){
+                if(otpId.getOtp().equals(forgetPassword.get().getOtp())) {
+                    Optional<User> user = repository.findById(otpId.getId());
+                    if(user.isPresent()){
+                        User use = user.get();
+                        use.setPassword(passwordEncoder.encode(otpId.getPassword()));
+                        repository.save(use);
+                        forgetPasswordRepository.deleteByUserId(otpId.getId());
+                        return "Password changed successfully";
+                    }
+                }
+            }
+            return "Otp doesn't match";
+    }
+
+    @Override
+    public EmailMsg sendOtpForForgetPassword(String email) throws Exception {
+        EmailMsg emailMsg = new EmailMsg();
+        try {
+            Random random = new Random();
+            Integer generateOtp = random.nextInt(1010,10000);
+            Optional<User> user = repository.findByEmail(email);
+            if (user.isPresent()) {
+                var forgetPassword = ForgetPassword.builder()
+                        .otp(generateOtp)
+                        .userId(user.get().getId())
+                        .build();
+                forgetPasswordRepository.save(forgetPassword);
+                String msg = emailService.sendOtp(email, user.get().getName(), String.valueOf(generateOtp));
+                emailMsg.setMsg(msg);
+                emailMsg.setId(user.get().getId());
+            }else{
+                emailMsg.setMsg("otp not sent");
+                emailMsg.setId(null);
+            }
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
         }
-        return "Otp doesn't match";
+        return emailMsg;
     }
 }

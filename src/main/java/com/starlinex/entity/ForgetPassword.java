@@ -1,26 +1,23 @@
 package com.starlinex.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class TempUser {
+public class ForgetPassword {
 
     @Id
     @GeneratedValue
-    private Integer id;
-    private String name;
-    private String email;
-    private String phone;
-    private String otp;
-    private String password;
+    Integer id;
+    Integer otp;
+    Integer userId;
 }
