@@ -1,5 +1,6 @@
 package com.starlinex.controller;
 
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.*;
 import com.starlinex.service.impl.AuthenticationServiceImpl;
 import com.starlinex.service.impl.TempUserServiceImpl;
@@ -23,22 +24,15 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<ServiceResponse> authenticate(
             @RequestBody AuthenticationRequest request
-    ) throws Exception {
+    ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         try {
             AuthenticationResponse authenticationResponse = service.authenticate(request);
-            if (authenticationResponse != null) {
-                serviceResponse.setResponse(authenticationResponse);
-                serviceResponse.setResponseCode(200);
-                serviceResponse.setMessage("success");
-            } else {
-                serviceResponse.setResponse(null);
-                serviceResponse.setResponseCode(400);
-                serviceResponse.setMessage("Bad credentials");
-            }
-
+            serviceResponse.setResponse(authenticationResponse);
+            serviceResponse.setResponseCode(200);
+            serviceResponse.setMessage("success");
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new StarLinexException("Please check your credentials");
         }
         return ResponseEntity.ok(serviceResponse);
     }
@@ -46,30 +40,19 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<ServiceResponse> register(
             @RequestBody RegisterRequest request
-    ) throws Exception {
+    ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
-        try {
-            EmailMsg emailMsg = tempUserService.register(request);
-            if (emailMsg != null) {
-                serviceResponse.setResponse(emailMsg);
-                serviceResponse.setResponseCode(200);
-                serviceResponse.setMessage("success");
-            } else {
-                serviceResponse.setResponse(null);
-                serviceResponse.setResponseCode(404);
-                serviceResponse.setMessage("Bad request");
-            }
-
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
+        EmailMsg emailMsg = tempUserService.register(request);
+        serviceResponse.setResponse(emailMsg);
+        serviceResponse.setResponseCode(200);
+        serviceResponse.setMessage("success");
         return ResponseEntity.ok(serviceResponse);
     }
 
     @PostMapping("/verifyOtp")
     public ResponseEntity<ServiceResponse> verifyOtp(
             @RequestBody OtpId otpId
-    ) throws Exception {
+    ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         try {
             AuthenticationResponse authenticationResponse = tempUserService.verifyOtpAndSaveUser(otpId);
@@ -84,10 +67,7 @@ public class AuthenticationController {
             }
 
         } catch (Exception e) {
-            serviceResponse.setResponse(null);
-            serviceResponse.setResponseCode(400);
-            serviceResponse.setMessage("otp doesn't match");
-            throw new Exception(e.getMessage());
+            throw new StarLinexException("Something went wrong");
         }
 
         return ResponseEntity.ok(serviceResponse);
@@ -102,7 +82,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgetPassword")
-    public ResponseEntity<ServiceResponse> getOtp(@RequestBody com.starlinex.model.User email) throws Exception {
+    public ResponseEntity<ServiceResponse> getOtp(@RequestBody com.starlinex.model.User email) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setMessage("Success");
         serviceResponse.setResponseCode(200);

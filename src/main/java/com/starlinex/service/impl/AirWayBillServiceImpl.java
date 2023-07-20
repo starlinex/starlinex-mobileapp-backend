@@ -1,6 +1,7 @@
 package com.starlinex.service.impl;
 
 import com.starlinex.entity.AirWayBill;
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.AirWay;
 import com.starlinex.repository.AirWayBillRepository;
 import com.starlinex.service.AirWayBillService;
@@ -28,7 +29,7 @@ public class AirWayBillServiceImpl implements AirWayBillService {
     private String path;
 
     @Override
-    public String storeAirWayBillInfo(AirWay airWay) throws Exception{
+    public String storeAirWayBillInfo(AirWay airWay) throws StarLinexException {
         try{
             List<String> filePath = new ArrayList<>();
             File file = new File(path);
@@ -43,10 +44,6 @@ public class AirWayBillServiceImpl implements AirWayBillService {
                     throw new RuntimeException(e);
                 }
             });
-//            File file = new File(path);
-//            if(!file.exists()){
-//                file.mkdir();
-//            }
             var airWayBill = AirWayBill.builder()
                     .userId(airWay.getUserId())
             .awbNbr(airWay.getAwbNbr())
@@ -121,19 +118,18 @@ public class AirWayBillServiceImpl implements AirWayBillService {
                     .build();
             airWayBillRepository.save(airWayBill);
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            throw new StarLinexException(e.getMessage());
         }
         return "Data added successfully";
     }
 
     @Override
-    public List<AirWayBill> getDataById(Integer id) throws Exception{
+    public List<AirWayBill> getDataById(Integer id) throws StarLinexException{
         List<AirWayBill> airWays;
         try{
             airWays = airWayBillRepository.findAllByUserId(id);
         }catch (Exception e){
-            LOGGER.logrb(Level.SEVERE, ResourceBundle.getBundle(e.toString()), String.valueOf(e));
-            throw new Exception(e.getMessage());
+            throw new StarLinexException("Data not Found");
         }
         return airWays;
     }

@@ -5,6 +5,7 @@ import com.starlinex.entity.TempUser;
 import com.starlinex.entity.Token;
 import com.starlinex.entity.TokenType;
 import com.starlinex.entity.User;
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.AuthenticationResponse;
 import com.starlinex.model.EmailMsg;
 import com.starlinex.model.OtpId;
@@ -34,9 +35,13 @@ public class TempUserServiceImpl implements TempUserService {
 
 
     @Override
-    public EmailMsg register(RegisterRequest request) throws Exception {
+    public EmailMsg register(RegisterRequest request) throws StarLinexException {
         EmailMsg emailMsg = new EmailMsg();
         try{
+            Optional<User> byEmail = userRepository.findByEmail(request.getEmail());
+            if(byEmail.isPresent()){
+                throw new StarLinexException("email already exists");
+            }
             Random random = new Random();
             Integer generateOtp = random.nextInt(1010,10000);
         var user = TempUser
@@ -52,14 +57,14 @@ public class TempUserServiceImpl implements TempUserService {
         emailMsg.setMsg(Objects.requireNonNullElse(msg, "Otp not sent"));
         emailMsg.setId(user.getId());
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            throw new StarLinexException(e.getMessage());
         }
         return emailMsg;
     }
 
 
     @Override
-    public AuthenticationResponse verifyOtpAndSaveUser(OtpId otpId) throws Exception {
+    public AuthenticationResponse verifyOtpAndSaveUser(OtpId otpId) throws StarLinexException {
         try{
             Optional<TempUser> tempUser = repository.findById(otpId.getId());
             if(tempUser.isPresent()) {
@@ -86,7 +91,7 @@ public class TempUserServiceImpl implements TempUserService {
                 }
             }
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            throw new StarLinexException(e.getMessage());
         }
         return null;
     }

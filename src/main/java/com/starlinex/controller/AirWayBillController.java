@@ -1,6 +1,7 @@
 package com.starlinex.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.AirWay;
 import com.starlinex.model.ServiceResponse;
 import com.starlinex.service.impl.AirWayBillServiceImpl;
@@ -17,7 +18,7 @@ public class AirWayBillController {
     private final AirWayBillServiceImpl airWayBillService;
 
     @PostMapping("/storeAirWayBill")
-    public ResponseEntity<ServiceResponse> saveAirWayBill(@RequestPart("airWay") String airWay, @RequestPart("doc") MultipartFile[] file) throws Exception {
+    public ResponseEntity<ServiceResponse> saveAirWayBill(@RequestPart("airWay") String airWay, @RequestPart("doc") MultipartFile[] file) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         AirWay airWayModel = new AirWay();
         try {
@@ -30,34 +31,19 @@ public class AirWayBillController {
                 serviceResponse.setMessage("Success");
             }
         } catch (Exception e) {
-            serviceResponse.setResponseCode(404);
-            serviceResponse.setMessage("Failed to store data");
-            throw new Exception(e.getMessage());
+            throw new StarLinexException("Failed to store data");
         }
         return ResponseEntity.ok(serviceResponse);
 
     }
 
     @GetMapping("/getAllData/{id}")
-    public ResponseEntity<ServiceResponse> getAllData(@PathVariable Integer id) throws Exception {
+    public ResponseEntity<ServiceResponse> getAllData(@PathVariable Integer id) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setResponse(airWayBillService.getDataById(id));
         serviceResponse.setResponseCode(200);
         serviceResponse.setMessage("Success");
         return ResponseEntity.ok(serviceResponse);
     }
-
-//    @GetMapping("/getAllData1/{id}")
-//    public ResponseEntity<ServiceResponse> getAllData1(@PathVariable Integer id) throws Exception {
-//        ServiceResponse serviceResponse = new ServiceResponse();
-//        List<byte[]> img = new ArrayList<>();
-//        airWayBillService.getDataById(id).forEach(airWayBill -> {
-//            img.add(DocUtils.decompressImage(airWayBill.getShipperKycDoc()));
-//        });
-//        serviceResponse.setResponse(img);
-//        serviceResponse.setResponseCode(200);
-//        serviceResponse.setMessage("Success");
-//        return ResponseEntity.ok(serviceResponse);
-//    }
 
 }

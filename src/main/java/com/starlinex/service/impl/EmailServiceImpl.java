@@ -1,5 +1,6 @@
 package com.starlinex.service.impl;
 
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender javaMailSender;
 
     @Override
-    public String sendOtp(String toEmail, String userName, String otp) throws Exception {
+    public String sendOtp(String toEmail, String userName, String otp) throws StarLinexException {
             String msg = null;
         try{
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
@@ -30,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(simpleMailMessage);
             msg = "Otp sent successfully";
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            throw new StarLinexException("Something went wrong");
         }
         return msg;
     }

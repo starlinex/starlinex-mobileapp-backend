@@ -6,6 +6,7 @@ import com.starlinex.entity.ForgetPassword;
 import com.starlinex.entity.Token;
 import com.starlinex.entity.TokenType;
 import com.starlinex.entity.User;
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.*;
 import com.starlinex.repository.ForgetPasswordRepository;
 import com.starlinex.repository.TokenRepository;
@@ -151,7 +152,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public EmailMsg sendOtpForForgetPassword(String email) throws Exception {
+    public EmailMsg sendOtpForForgetPassword(String email) throws StarLinexException {
         EmailMsg emailMsg = new EmailMsg();
         try {
             Random random = new Random();
@@ -167,11 +168,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 emailMsg.setMsg(msg);
                 emailMsg.setId(user.get().getId());
             }else{
-                emailMsg.setMsg("otp not sent");
-                emailMsg.setId(null);
+                throw new StarLinexException("email doesn't exist");
             }
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            throw new StarLinexException("Something went wrong");
         }
         return emailMsg;
     }
