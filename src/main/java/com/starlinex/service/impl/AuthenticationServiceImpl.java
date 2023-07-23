@@ -14,7 +14,10 @@ import com.starlinex.repository.UserRepository;
 import com.starlinex.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +31,7 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -134,20 +138,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public String resetPassword(OtpId otpId){
-        Optional<ForgetPassword> forgetPassword = forgetPasswordRepository.findByUserId(otpId.getId());
-            if(forgetPassword.isPresent()){
-                if(otpId.getOtp().equals(forgetPassword.get().getOtp())) {
-                    Optional<User> user = repository.findById(otpId.getId());
-                    if(user.isPresent()){
-                        User use = user.get();
-                        use.setPassword(passwordEncoder.encode(otpId.getPassword()));
-                        repository.save(use);
-                        forgetPasswordRepository.deleteByUserId(otpId.getId());
+    @Transactional
+    public String resetPassword(OtpId otpId) throws StarLinexException{
+        try {
+            Optional<ForgetPassword> forgetPassword = forgetPasswordRepository.findByUserId(otpId.getId());
+            if (forgetPassword.isPresent()) {
+                if (otpId.getOtp().equals(forgetPassword.get().getOtp())) {
+                    User user = repository.findById(otpId.getId()).orElseThrow(()->new StarLinexException("User not found"));
+                        user.setPassword(passwordEncoder.encode(otpId.getPassword()));
+                        repository.save(user);
+                        LOGGER.info("Password changed successfully");
+                        forgetPasswordRepository.removeByUserId(user.getId());
                         return "Password changed successfully";
-                    }
                 }
             }
+        }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
+            throw new StarLinexException("Oops something went wrong");
+        }
             return "Otp doesn't match";
     }
 
@@ -171,6 +179,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new StarLinexException("email doesn't exist");
             }
         }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Something went wrong");
         }
         return emailMsg;

@@ -6,15 +6,14 @@ import com.starlinex.entity.Token;
 import com.starlinex.entity.TokenType;
 import com.starlinex.entity.User;
 import com.starlinex.exception.StarLinexException;
-import com.starlinex.model.AuthenticationResponse;
-import com.starlinex.model.EmailMsg;
-import com.starlinex.model.OtpId;
-import com.starlinex.model.RegisterRequest;
+import com.starlinex.model.*;
 import com.starlinex.repository.TempUserRepository;
 import com.starlinex.repository.TokenRepository;
 import com.starlinex.repository.UserRepository;
 import com.starlinex.service.TempUserService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +25,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class TempUserServiceImpl implements TempUserService {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(TempUserServiceImpl.class);
     private final PasswordEncoder passwordEncoder;
     private final TempUserRepository repository;
     private final UserRepository userRepository;
@@ -57,6 +57,7 @@ public class TempUserServiceImpl implements TempUserService {
         emailMsg.setMsg(Objects.requireNonNullElse(msg, "Otp not sent"));
         emailMsg.setId(user.getId());
         }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException(e.getMessage());
         }
         return emailMsg;
@@ -64,12 +65,12 @@ public class TempUserServiceImpl implements TempUserService {
 
 
     @Override
-    public AuthenticationResponse verifyOtpAndSaveUser(OtpId otpId) throws StarLinexException {
+    public AuthenticationResponse verifyOtpAndSaveUser(SaveUser saveUser) throws StarLinexException {
         try{
-            Optional<TempUser> tempUser = repository.findById(otpId.getId());
+            Optional<TempUser> tempUser = repository.findById(saveUser.getId());
             if(tempUser.isPresent()) {
                 String otp = tempUser.get().getOtp();
-                String reqOtp = String.valueOf(otpId.getOtp());
+                String reqOtp = String.valueOf(saveUser.getOtp());
                 if (otp.equals(reqOtp)) {
                         var user = User.builder()
                                 .name(tempUser.get().getName())
@@ -78,7 +79,7 @@ public class TempUserServiceImpl implements TempUserService {
                                 .password(tempUser.get().getPassword())
                                 .build();
                         var savedUser = userRepository.save(user);
-                        repository.deleteById(otpId.getId());
+                        repository.deleteById(saveUser.getId());
                         var jwtToken = jwtService.generateToken(user);
                         var refreshToken = jwtService.generateRefreshToken(user);
                         saveUserToken(savedUser, jwtToken);
@@ -91,6 +92,7 @@ public class TempUserServiceImpl implements TempUserService {
                 }
             }
         }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException(e.getMessage());
         }
         return null;

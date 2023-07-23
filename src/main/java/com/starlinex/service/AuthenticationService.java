@@ -1,5 +1,6 @@
 package com.starlinex.service;
 
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,7 +17,7 @@ public interface AuthenticationService {
             HttpServletResponse response
     ) throws IOException;
 
-    String resetPassword(OtpId otpId);
+    String resetPassword(OtpId otpId) throws StarLinexException;
 
-    EmailMsg sendOtpForForgetPassword(String email) throws Exception;
+    EmailMsg sendOtpForForgetPassword(String email) throws StarLinexException;
 }

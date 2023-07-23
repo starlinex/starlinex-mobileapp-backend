@@ -5,7 +5,11 @@ import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.AirWay;
 import com.starlinex.model.ServiceResponse;
 import com.starlinex.service.impl.AirWayBillServiceImpl;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,11 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/airWay")
 @RequiredArgsConstructor
 public class AirWayBillController {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
     private final AirWayBillServiceImpl airWayBillService;
 
     @PostMapping("/storeAirWayBill")
-    public ResponseEntity<ServiceResponse> saveAirWayBill(@RequestPart("airWay") String airWay, @RequestPart("doc") MultipartFile[] file) throws StarLinexException {
+    public ResponseEntity<ServiceResponse> saveAirWayBill(@RequestPart("airWay") @NotNull String airWay, @RequestPart("doc") MultipartFile[] file) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         AirWay airWayModel = new AirWay();
         try {
@@ -31,6 +35,7 @@ public class AirWayBillController {
                 serviceResponse.setMessage("Success");
             }
         } catch (Exception e) {
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Failed to store data");
         }
         return ResponseEntity.ok(serviceResponse);
@@ -38,7 +43,7 @@ public class AirWayBillController {
     }
 
     @GetMapping("/getAllData/{id}")
-    public ResponseEntity<ServiceResponse> getAllData(@PathVariable Integer id) throws StarLinexException {
+    public ResponseEntity<ServiceResponse> getAllData(@PathVariable @NotNull Integer id) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setResponse(airWayBillService.getDataById(id));
         serviceResponse.setResponseCode(200);

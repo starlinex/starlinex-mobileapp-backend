@@ -6,8 +6,12 @@ import com.starlinex.service.impl.AuthenticationServiceImpl;
 import com.starlinex.service.impl.TempUserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -16,14 +20,14 @@ import java.io.IOException;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
     private final AuthenticationServiceImpl service;
     private final TempUserServiceImpl tempUserService;
 
 
     @PostMapping("/authenticate")
     public ResponseEntity<ServiceResponse> authenticate(
-            @RequestBody AuthenticationRequest request
+           @Valid @RequestBody AuthenticationRequest request
     ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         try {
@@ -32,6 +36,7 @@ public class AuthenticationController {
             serviceResponse.setResponseCode(200);
             serviceResponse.setMessage("success");
         } catch (Exception e) {
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Please check your credentials");
         }
         return ResponseEntity.ok(serviceResponse);
@@ -39,7 +44,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<ServiceResponse> register(
-            @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request
     ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         EmailMsg emailMsg = tempUserService.register(request);
@@ -51,7 +56,7 @@ public class AuthenticationController {
 
     @PostMapping("/verifyOtp")
     public ResponseEntity<ServiceResponse> verifyOtp(
-            @RequestBody OtpId otpId
+            @Valid @RequestBody SaveUser otpId
     ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         try {
@@ -67,6 +72,7 @@ public class AuthenticationController {
             }
 
         } catch (Exception e) {
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Something went wrong");
         }
 
@@ -82,7 +88,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgetPassword")
-    public ResponseEntity<ServiceResponse> getOtp(@RequestBody com.starlinex.model.User email) throws StarLinexException {
+    public ResponseEntity<ServiceResponse> getOtp(@Valid @RequestBody ForgetPassword email) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setMessage("Success");
         serviceResponse.setResponseCode(200);
@@ -91,7 +97,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<ServiceResponse> checkOtpAndUpdatePassword(@RequestBody OtpId otpId) {
+    public ResponseEntity<ServiceResponse> checkOtpAndUpdatePassword(@Valid @RequestBody OtpId otpId) throws StarLinexException{
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setMessage("Success");
         serviceResponse.setResponseCode(200);

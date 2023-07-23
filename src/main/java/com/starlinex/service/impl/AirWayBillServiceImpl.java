@@ -6,6 +6,8 @@ import com.starlinex.model.AirWay;
 import com.starlinex.repository.AirWayBillRepository;
 import com.starlinex.service.AirWayBillService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
 public class AirWayBillServiceImpl implements AirWayBillService {
-    private static final Logger LOGGER = Logger.getLogger(AirWayBill.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(AirWayBillServiceImpl.class);
     private final AirWayBillRepository airWayBillRepository;
     @Value("${doc.path}")
     private String path;
@@ -118,6 +119,7 @@ public class AirWayBillServiceImpl implements AirWayBillService {
                     .build();
             airWayBillRepository.save(airWayBill);
         }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException(e.getMessage());
         }
         return "Data added successfully";
@@ -129,6 +131,7 @@ public class AirWayBillServiceImpl implements AirWayBillService {
         try{
             airWays = airWayBillRepository.findAllByUserId(id);
         }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Data not Found");
         }
         return airWays;

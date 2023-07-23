@@ -3,6 +3,8 @@ package com.starlinex.service.impl;
 import com.starlinex.exception.StarLinexException;
 import com.starlinex.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -31,6 +35,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(simpleMailMessage);
             msg = "Otp sent successfully";
         }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Something went wrong");
         }
         return msg;
