@@ -33,18 +33,18 @@ public class AirWayBillServiceImpl implements AirWayBillService {
     public String storeAirWayBillInfo(AirWay airWay) throws StarLinexException {
         try{
             List<String> filePath = new ArrayList<>();
-            File file = new File(path);
-            if(!file.exists()){
-                file.mkdir();
-            }
-            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
-                filePath.add(path + "/" + doc.getOriginalFilename());
-                try {
-                    Files.copy(doc.getInputStream(), Paths.get(path + File.separator + doc.getOriginalFilename()));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+//            File file = new File(path);
+//            if(!file.exists()){
+//                file.mkdir();
+//            }
+//            Arrays.stream(airWay.getShipperKycDoc()).forEach(doc->{
+//                filePath.add(path + "/" + doc.getOriginalFilename());
+//                try {
+//                    Files.copy(doc.getInputStream(), Paths.get(path + File.separator + doc.getOriginalFilename()));
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
             var airWayBill = AirWayBill.builder()
                     .userId(airWay.getUserId())
             .awbNbr(airWay.getAwbNbr())
