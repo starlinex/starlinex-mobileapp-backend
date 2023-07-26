@@ -1,95 +1,79 @@
 package com.starlinex.controller;
 
-import com.starlinex.entity.User;
+import com.starlinex.exception.StarLinexException;
 import com.starlinex.model.*;
-import com.starlinex.repository.UserRepository;
-import com.starlinex.service.impl.AuthenticationService;
-import com.starlinex.service.impl.TempUserService;
+import com.starlinex.service.impl.AuthenticationServiceImpl;
+import com.starlinex.service.impl.TempUserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-
-    private final AuthenticationService service;
-    private final UserRepository repository;
-    private final TempUserService tempUserService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
+    private final AuthenticationServiceImpl service;
+    private final TempUserServiceImpl tempUserService;
 
 
     @PostMapping("/authenticate")
     public ResponseEntity<ServiceResponse> authenticate(
-            @RequestBody AuthenticationRequest request
-    ) throws Exception {
+           @Valid @RequestBody AuthenticationRequest request
+    ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
-        try{
+        try {
             AuthenticationResponse authenticationResponse = service.authenticate(request);
-            if(authenticationResponse != null){
-                serviceResponse.setResponse(authenticationResponse);
-                serviceResponse.setResponseCode(200);
-                serviceResponse.setMessage("success");
-            }else{
-                serviceResponse.setResponse(null);
-                serviceResponse.setResponseCode(400);
-                serviceResponse.setMessage("Bad credentials");
-            }
-
-        }catch (Exception e) {
-            throw new Exception(e.getMessage());
+            serviceResponse.setResponse(authenticationResponse);
+            serviceResponse.setResponseCode(200);
+            serviceResponse.setMessage("success");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(),e);
+            throw new StarLinexException("Please check your credentials");
         }
         return ResponseEntity.ok(serviceResponse);
     }
 
     @PostMapping("/register")
     public ResponseEntity<ServiceResponse> register(
-            @RequestBody RegisterRequest request
-    ) throws Exception {
+            @Valid @RequestBody RegisterRequest request
+    ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
-        try{
-            Otp otp = tempUserService.register(request);
-            if(otp!=null){
-                serviceResponse.setResponse(otp);
-                serviceResponse.setResponseCode(200);
-                serviceResponse.setMessage("success");
-            }
-        else{
-                serviceResponse.setResponse(null);
-                serviceResponse.setResponseCode(404);
-                serviceResponse.setMessage("Bad request");
-            }
-
-        }catch (Exception e){
-            throw new Exception(e.getMessage());
-        }
+        EmailMsg emailMsg = tempUserService.register(request);
+        serviceResponse.setResponse(emailMsg);
+        serviceResponse.setResponseCode(200);
+        serviceResponse.setMessage("success");
         return ResponseEntity.ok(serviceResponse);
     }
 
     @PostMapping("/verifyOtp")
     public ResponseEntity<ServiceResponse> verifyOtp(
-            @RequestBody OtpId otpId
-    ) throws Exception {
+            @Valid @RequestBody SaveUser otpId
+    ) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
-        try{
+        try {
             AuthenticationResponse authenticationResponse = tempUserService.verifyOtpAndSaveUser(otpId);
-            if(authenticationResponse != null){
+            if (authenticationResponse != null) {
                 serviceResponse.setResponse(authenticationResponse);
                 serviceResponse.setResponseCode(200);
                 serviceResponse.setMessage("success");
-            }else{
+            } else {
                 serviceResponse.setResponse(null);
-                serviceResponse.setResponseCode(400);
+                serviceResponse.setResponseCode(200);
                 serviceResponse.setMessage("otp doesn't match");
             }
 
-        }catch (Exception e){
-            throw new Exception(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(),e);
+            throw new StarLinexException("Something went wrong");
         }
 
         return ResponseEntity.ok(serviceResponse);
@@ -102,22 +86,22 @@ public class AuthenticationController {
     ) throws IOException {
         service.refreshToken(request, response);
     }
-    @PostMapping("/forgetPassword")
-    public ResponseEntity<Otp> getOtp(@RequestBody com.starlinex.model.User email){
-        Optional<User> user = repository.findByEmail(email.getEmail());
-        User use = user.get();
-        Otp otp = new Otp();
-        otp.setOtp(7896);
-        otp.setId(use.getId());
-        return ResponseEntity.ok(otp);
-    }
 
-    @PostMapping("/resetPassword")
-    public ResponseEntity<ServiceResponse> checkOtpAndUpdatePassword(@RequestBody OtpId otpId){
+    @PostMapping("/forgetPassword")
+    public ResponseEntity<ServiceResponse> getOtp(@Valid @RequestBody ForgetPassword email) throws StarLinexException {
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setMessage("Success");
         serviceResponse.setResponseCode(200);
-        serviceResponse.setResponse(service.forgetPassword(otpId));
+        serviceResponse.setResponse(service.sendOtpForForgetPassword(email.getEmail()));
+        return ResponseEntity.ok(serviceResponse);
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<ServiceResponse> checkOtpAndUpdatePassword(@Valid @RequestBody OtpId otpId) throws StarLinexException{
+        ServiceResponse serviceResponse = new ServiceResponse();
+        serviceResponse.setMessage("Success");
+        serviceResponse.setResponseCode(200);
+        serviceResponse.setResponse(service.resetPassword(otpId));
         return ResponseEntity.ok(serviceResponse);
     }
 
