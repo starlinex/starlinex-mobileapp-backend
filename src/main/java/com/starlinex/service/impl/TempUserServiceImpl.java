@@ -43,7 +43,7 @@ public class TempUserServiceImpl implements TempUserService {
                 throw new StarLinexException("email already exists");
             }
             Random random = new Random();
-            Integer generateOtp = random.nextInt(1010,10000);
+            Integer generateOtp = random.nextInt(1010,9999);
         var user = TempUser
                 .builder()
                 .name(request.getName())
