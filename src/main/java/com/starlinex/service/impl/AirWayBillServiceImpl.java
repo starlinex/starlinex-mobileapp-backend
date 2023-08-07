@@ -134,6 +134,7 @@ public class AirWayBillServiceImpl implements AirWayBillService {
             weightAndDimensionsList.forEach(list->{
                 var weightAndDimension = WeightAndDimensions.builder()
                         .userId(airWay.getUserId())
+                        .boxNo(list.getBoxNo())
                         .actualWt(list.getActualWt())
                         .lcm(list.getLcm())
                         .bcm(list.getBcm())
