@@ -64,30 +64,11 @@ public class AirWayBill {
     private String consignerWeight;
     private String chargeableWeight;
     private String parcelNo;
-    private String boxNo;
-    private String actualWt;
-    private String lcm;
-    private String bcm;
-    private String hcm;
-    private String volumetricWt;
     private String chargeableEt;
-
-    private String specialServiceName;
-    private String specialService;
 
     private String invoiceType;
     private String incoterms;
     private String note;
     private String descNote;
-
-    private String shipmentBoxNo;
-    private String shipmentDescription;
-    private String shipmentHsCode;
-    private String shipmentUnityType;
-    private String shipmentQuantity;
-    private String shipmentUnitWeight;
-    private String shipmentIgst;
-    private String shipmentUnitRates;
-    private String shipmentAmount;
 
 }
