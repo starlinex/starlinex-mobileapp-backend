@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -58,29 +59,14 @@ public class AirWay {
     private String consignerWeight;
     private String chargeableWeight;
     private String parcelNo;
-    private String boxNo;
-    private String actualWt;
-    private String lcm;
-    private String bcm;
-    private String hcm;
-    private String volumetricWt;
     private String chargeableEt;
-
-    private String specialServiceName;
-    private String specialService;
 
     private String invoiceType;
     private String incoterms;
     private String note;
     private String descNote;
 
-    private String shipmentBoxNo;
-    private String shipmentDescription;
-    private String shipmentHsCode;
-    private String shipmentUnityType;
-    private String shipmentQuantity;
-    private String shipmentUnitWeight;
-    private String shipmentIgst;
-    private String shipmentUnitRates;
-    private String shipmentAmount;
+    private List<ShipmentData> shipmentDetailsList;
+    private List<SpecialServiceDetails> specialServices;
+    private List<WeightAndDimensionDetails> weightAndDimensions;
 }

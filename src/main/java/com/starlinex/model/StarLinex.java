@@ -1,24 +1,18 @@
-package com.starlinex.entity;
+package com.starlinex.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class AirWayBill {
-
-    @Id
-    @GeneratedValue
-    private Integer id;
+public class StarLinex {
     private Integer userId;
     private String awbNbr;
     private String destination;
@@ -42,7 +36,7 @@ public class AirWayBill {
     private String shipperEmailAddress;
     private String shipperKycType;
     private String shipperKycNbr;
-    private List<String> shipperKycDoc;
+    private MultipartFile[] shipperKycDoc;
 
     private String receiverAddressBook;
     private String receiverCompany;
@@ -64,11 +58,29 @@ public class AirWayBill {
     private String consignerWeight;
     private String chargeableWeight;
     private String parcelNo;
+    private String boxNo;
+    private String actualWt;
+    private String lcm;
+    private String bcm;
+    private String hcm;
+    private String volumetricWt;
     private String chargeableEt;
+
+    private String specialServiceName;
+    private String specialService;
 
     private String invoiceType;
     private String incoterms;
     private String note;
     private String descNote;
 
+    private String shipmentBoxNo;
+    private String shipmentDescription;
+    private String shipmentHsCode;
+    private String shipmentUnityType;
+    private String shipmentQuantity;
+    private String shipmentUnitWeight;
+    private String shipmentIgst;
+    private String shipmentUnitRates;
+    private String shipmentAmount;
 }

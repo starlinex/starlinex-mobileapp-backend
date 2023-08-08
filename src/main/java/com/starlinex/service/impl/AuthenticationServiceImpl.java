@@ -164,7 +164,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         EmailMsg emailMsg = new EmailMsg();
         try {
             Random random = new Random();
-            Integer generateOtp = random.nextInt(1010,10000);
+            Integer generateOtp = random.nextInt(1010,9999);
             Optional<User> user = repository.findByEmail(email);
             if (user.isPresent()) {
                 var forgetPassword = ForgetPassword.builder()

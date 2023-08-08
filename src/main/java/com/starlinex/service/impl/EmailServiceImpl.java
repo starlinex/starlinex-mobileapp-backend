@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
             simpleMailMessage.setSubject("One Time Password (OTP) to verify Account");
             simpleMailMessage.setText(msgBody);
             javaMailSender.send(simpleMailMessage);
-            msg = "Otp sent successfully";
+            msg = "Otp sent successfully \n" + "OTP: " + otp;
         }catch (Exception e){
             LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Something went wrong");
