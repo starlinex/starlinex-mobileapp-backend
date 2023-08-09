@@ -174,6 +174,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 forgetPasswordRepository.save(forgetPassword);
                 String msg = emailService.sendOtp(email, user.get().getName(), String.valueOf(generateOtp));
                 emailMsg.setMsg(msg);
+                emailMsg.setOtp(generateOtp);
                 emailMsg.setId(user.get().getId());
             }else{
                 throw new StarLinexException("email doesn't exist");

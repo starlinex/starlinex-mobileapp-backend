@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmailMsg {
     private String msg;
+    private Integer otp;
     private Integer id;
 }
