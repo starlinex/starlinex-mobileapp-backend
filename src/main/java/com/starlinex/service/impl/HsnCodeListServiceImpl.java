@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,9 +21,11 @@ public class HsnCodeListServiceImpl implements HsnCodeListService {
     private final HsnCodeListRepository repository;
     @Override
     public List<HsnCodeList> getHsnList(String keyWord) throws StarLinexException {
-        List<HsnCodeList> hsnCodeList = null;
+        List<HsnCodeList> hsnCodeList = new ArrayList<>();
         try{
-            hsnCodeList = repository.searchByKeyword(keyWord );
+            if(!keyWord.isBlank()) {
+                hsnCodeList = repository.searchByKeyword(keyWord);
+            }
         }catch (Exception e){
             LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Something went wrong");

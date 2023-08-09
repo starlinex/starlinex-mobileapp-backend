@@ -55,6 +55,7 @@ public class TempUserServiceImpl implements TempUserService {
         var savedUser = repository.save(user);
         String msg = emailService.sendOtp(request.getEmail(),request.getName(), String.valueOf(generateOtp));
         emailMsg.setMsg(Objects.requireNonNullElse(msg, "Otp not sent"));
+        emailMsg.setOtp(generateOtp);
         emailMsg.setId(user.getId());
         }catch (Exception e){
             LOGGER.error(e.getMessage(),e);
