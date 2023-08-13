@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleInvalidArgument(MethodArgumentNotValidException e){
         Map<String, String> errorMap = new HashMap<>();
         FieldError fieldError = e.getBindingResult().getFieldError();
-        errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+        errorMap.put("message", fieldError.getDefaultMessage());
         return errorMap;
     }
 

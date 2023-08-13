@@ -67,7 +67,7 @@ public class AuthenticationController {
                 serviceResponse.setMessage("success");
             } else {
                 serviceResponse.setResponse(null);
-                serviceResponse.setResponseCode(200);
+                serviceResponse.setResponseCode(401);
                 serviceResponse.setMessage("otp doesn't match");
             }
 
@@ -99,9 +99,16 @@ public class AuthenticationController {
     @PostMapping("/resetPassword")
     public ResponseEntity<ServiceResponse> checkOtpAndUpdatePassword(@Valid @RequestBody OtpId otpId) throws StarLinexException{
         ServiceResponse serviceResponse = new ServiceResponse();
-        serviceResponse.setMessage("Success");
-        serviceResponse.setResponseCode(200);
-        serviceResponse.setResponse(service.resetPassword(otpId));
+        String msg = service.resetPassword(otpId);
+       if(msg != null) {
+           serviceResponse.setMessage("Success");
+           serviceResponse.setResponseCode(200);
+           serviceResponse.setResponse(msg);
+       }else {
+            serviceResponse.setResponse(null);
+            serviceResponse.setResponseCode(401);
+            serviceResponse.setMessage("otp doesn't match");
+        }
         return ResponseEntity.ok(serviceResponse);
     }
 
