@@ -156,7 +156,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             LOGGER.error(e.getMessage(),e);
             throw new StarLinexException("Oops something went wrong");
         }
-            return "Otp doesn't match";
+            return null;
     }
 
     @Override
