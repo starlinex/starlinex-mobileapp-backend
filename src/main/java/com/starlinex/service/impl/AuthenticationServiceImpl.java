@@ -160,6 +160,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Transactional
     public EmailMsg sendOtpForForgetPassword(String email) throws StarLinexException {
         EmailMsg emailMsg = new EmailMsg();
         try {
@@ -171,6 +172,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .otp(generateOtp)
                         .userId(user.get().getId())
                         .build();
+                if(forgetPasswordRepository.findByUserId(user.get().getId()).isPresent()){
+                    forgetPasswordRepository.removeByUserId(user.get().getId());
+                }
                 forgetPasswordRepository.save(forgetPassword);
                 String msg = emailService.sendOtp(email, user.get().getName(), String.valueOf(generateOtp));
                 emailMsg.setMsg(msg);
