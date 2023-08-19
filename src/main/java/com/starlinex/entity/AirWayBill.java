@@ -25,6 +25,8 @@ public class AirWayBill {
     private String product;
     private Date bookingDate;
     private Boolean insurance;
+    private String insuranceAmt;
+    private String insuranceValue;
     private String service;
     private String shipmentValue;
     private Date invoiceDate;
